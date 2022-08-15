@@ -1,0 +1,33 @@
+# These settings are synced to GitHub by Probot's Settings app
+# Settings App GitHub Repo: https://github.com/repository-settings/app
+
+repository:
+  # See https://docs.github.com/en/rest/reference/repos#update-a-repository for all available settings.
+
+  # The name of the repository. Changing this will rename the repository
+  name: za-zombie
+
+  # A short description of the repository that will show up on GitHub
+  description: YouTube Music Downloader
+
+  # A URL with more information about the repository
+  homepage: https://github.com/AmeerTaweel/za-zombie
+
+  # A comma-separated list of topics to set on the repository
+  topics: music, youtube, youtube-downloader
+
+  # Either `true` to make the repository private, or `false` to make it public.
+  private: false
+
+  # Either `true` to enable issues for this repository, `false` to disable them.
+  has_issues: true
+
+  # Either `true` to enable projects for this repository, or `false` to disable them.
+  # If projects are disabled for the organization, passing `true` will cause an API error.
+  has_projects: false
+
+  # Either `true` to enable the wiki for this repository, `false` to disable it.
+  has_wiki: false
+
+  # Updates the default branch for this repository.
+  default_branch: master
