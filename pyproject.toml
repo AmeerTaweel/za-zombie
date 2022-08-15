@@ -1,0 +1,36 @@
+[build-system]
+requires = [ "flit_core" ]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "za_zombie"
+version = "0.0.1"
+description = "YouTube Music Downloader"
+readme = "README.md"
+authors = [
+	{ name = "Ameer Taweel", email = "ameertaweel2002@gmail.com" }
+]
+keywords = [ "music", "youtube", "youtube-downloader" ]
+classifiers = [
+	"Development Status :: 2 - Pre-Alpha",
+	"Environment :: Console",
+	"Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+	"Natural Language :: English",
+	"Operating System :: OS Independent",
+	"Programming Language :: Python :: 3",
+	"Topic :: Multimedia :: Video"
+]
+dependencies = [
+	"mutagen",
+	"yt-dlp"
+]
+
+[project.license]
+file = "LICENSE"
+
+[project.urls]
+Source = "https://github.com/AmeerTaweel/za-zombie"
+
+[project.scripts]
+za-zombie = "za_zombie:main"

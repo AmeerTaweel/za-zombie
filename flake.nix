@@ -10,19 +10,31 @@
 	flake-utils.lib.eachDefaultSystem (system: let
 		pkgs = import nixpkgs { inherit system; };
 
-		pythonBuildDependencies = pythonPackages: with pythonPackages; [ ];
-		pythonTestDependencies = pythonPackages: with pythonPackages; [ ];
-		pythonRuntimeDependencies = pythonPackages: with pythonPackages; [
-			yt-dlp
-			mutagen
-		];
+		pythonInterpreter = pkgs.python310;
+		pythonPackages = pythonInterpreter.pkgs;
+		buildPythonApplication = pythonPackages.buildPythonApplication;
 
-		pythonDevelopmentEnvironment = pkgs.python310.withPackages (pythonPackages:
-    		pythonBuildDependencies pythonPackages ++
-			pythonTestDependencies pythonPackages ++
-			pythonRuntimeDependencies pythonPackages
+		pythonDependencies = with pythonPackages; {
+			build = [ flit ];
+			test = [ ];
+			runtime = [ mutagen yt-dlp ];
+		};
+
+		pythonDevelopmentEnvironment = pythonInterpreter.withPackages (_:
+			pythonDependencies.build ++ 
+			pythonDependencies.test ++ 
+			pythonDependencies.runtime
 		);
 	in {
+		packages = {
+			za-zombie = buildPythonApplication {
+				name = "za-zombie";
+				format = "pyproject";
+  				src = ./.;
+				buildInputs = pythonDependencies.build;
+  				propagatedBuildInputs = pythonDependencies.runtime;
+			};
+		};
 		devShell = pkgs.mkShell {
 			nativeBuildInputs = with pkgs; [
 				pythonDevelopmentEnvironment
