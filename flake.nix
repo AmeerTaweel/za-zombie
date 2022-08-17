@@ -25,16 +25,22 @@
 			pythonDependencies.test ++ 
 			pythonDependencies.runtime
 		);
+
+		za-zombie = buildPythonApplication {
+			name = "za-zombie";
+			format = "pyproject";
+			src = ./.;
+			buildInputs = pythonDependencies.build;
+			propagatedBuildInputs = pythonDependencies.runtime;
+		};
 	in {
 		packages = {
-			za-zombie = buildPythonApplication {
-				name = "za-zombie";
-				format = "pyproject";
-  				src = ./.;
-				buildInputs = pythonDependencies.build;
-  				propagatedBuildInputs = pythonDependencies.runtime;
-			};
+			default = za-zombie;
+			inherit za-zombie;
 		};
+		overlays.default = final: prev: {
+			inherit za-zombie;
+		};	
 		devShell = pkgs.mkShell {
 			nativeBuildInputs = with pkgs; [
 				pythonDevelopmentEnvironment
