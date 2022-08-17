@@ -4,7 +4,7 @@ build-backend = "flit_core.buildapi"
 
 [project]
 name = "za_zombie"
-version = "0.0.1"
+version = "1.0.0"
 description = "YouTube Music Downloader"
 readme = "README.md"
 authors = [

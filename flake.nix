@@ -17,7 +17,7 @@
 		pythonDependencies = with pythonPackages; {
 			build = [ flit ];
 			test = [ ];
-			runtime = [ mutagen yt-dlp ];
+			runtime = [ mutagen rich yt-dlp ];
 		};
 
 		pythonDevelopmentEnvironment = pythonInterpreter.withPackages (_:
