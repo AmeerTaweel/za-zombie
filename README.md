@@ -5,7 +5,7 @@ YouTube music downloader and tagger.
 ## Installation
 
 Install using [Nix](https://nixos.wiki/wiki/Nix_package_manager). This flake
-provides a derivation for `za-zombie`.
+provides a derivation and an overlay for `za-zombie`.
 
 ## Usage
 
