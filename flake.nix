@@ -20,6 +20,18 @@
 			runtime = [ mutagen rich yt-dlp ];
 		};
 
+		otherDependencies = with pkgs; {
+			build = [ ];
+			test = [ ];
+			runtime = [ ffmpeg ];
+		};
+
+		dependencies = with pkgs; {
+			build = otherDependencies.build ++ pythonDependencies.build;
+			test = otherDependencies.test ++ pythonDependencies.test;
+			runtime = otherDependencies.runtime ++ pythonDependencies.runtime;
+		};
+
 		pythonDevelopmentEnvironment = pythonInterpreter.withPackages (_:
 			pythonDependencies.build ++ 
 			pythonDependencies.test ++ 
@@ -30,8 +42,8 @@
 			name = "za-zombie";
 			format = "pyproject";
 			src = ./.;
-			buildInputs = pythonDependencies.build;
-			propagatedBuildInputs = pythonDependencies.runtime;
+			buildInputs = dependencies.build;
+			propagatedBuildInputs = dependencies.runtime;
 		};
 	in {
 		packages = {
@@ -44,6 +56,9 @@
 		devShell = pkgs.mkShell {
 			nativeBuildInputs = with pkgs; [
 				pythonDevelopmentEnvironment
+				otherDependencies.build
+				otherDependencies.test
+				otherDependencies.runtime
 			];
 			buildInputs = [ ];
 		};
