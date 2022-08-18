@@ -10,33 +10,31 @@
 	flake-utils.lib.eachDefaultSystem (system: let
 		pkgs = import nixpkgs { inherit system; };
 
-		pythonInterpreter = pkgs.python310;
-		pythonPackages = pythonInterpreter.pkgs;
-		buildPythonApplication = pythonPackages.buildPythonApplication;
+		python = pkgs.python3;
+		pythonPkgs = python.pkgs;
+		buildPythonApplication = pythonPkgs.buildPythonApplication;
 
-		pythonDependencies = with pythonPackages; {
-			build = [ flit ];
-			test = [ ];
-			runtime = [ mutagen rich yt-dlp ];
+		dependencies = rec {
+			python = with pythonPkgs; {
+				build = [ flit ];
+				test = [ ];
+				runtime = [ mutagen rich yt-dlp ];
+			};
+			other = with pkgs; {
+				build = [ ];
+				test = [ ];
+				runtime = [ ffmpeg hello];
+			};
+			build = [ other.build python.build ];
+			test = [ other.test python.test ];
+			runtime = [ other.runtime python.runtime ];
 		};
 
-		otherDependencies = with pkgs; {
-			build = [ ];
-			test = [ ];
-			runtime = [ ffmpeg ];
-		};
-
-		dependencies = with pkgs; {
-			build = otherDependencies.build ++ pythonDependencies.build;
-			test = otherDependencies.test ++ pythonDependencies.test;
-			runtime = otherDependencies.runtime ++ pythonDependencies.runtime;
-		};
-
-		pythonDevelopmentEnvironment = pythonInterpreter.withPackages (_:
-			pythonDependencies.build ++ 
-			pythonDependencies.test ++ 
-			pythonDependencies.runtime
-		);
+		pythonDevelopmentEnvironment = python.withPackages (_: [
+			dependencies.python.build
+			dependencies.python.test
+			dependencies.python.runtime
+		]);
 
 		za-zombie = buildPythonApplication {
 			name = "za-zombie";
@@ -56,9 +54,9 @@
 		devShell = pkgs.mkShell {
 			nativeBuildInputs = with pkgs; [
 				pythonDevelopmentEnvironment
-				otherDependencies.build
-				otherDependencies.test
-				otherDependencies.runtime
+				dependencies.other.build
+				dependencies.other.test
+				dependencies.other.runtime
 			];
 			buildInputs = [ ];
 		};
