@@ -23,7 +23,7 @@
 			other = with pkgs; {
 				build = [ ];
 				test = [ ];
-				runtime = [ ffmpeg hello];
+				runtime = [ ffmpeg ];
 			};
 			build = [ other.build python.build ];
 			test = [ other.test python.test ];
