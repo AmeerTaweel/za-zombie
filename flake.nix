@@ -25,16 +25,16 @@
 				test = [ ];
 				runtime = [ ffmpeg ];
 			};
-			build = [ other.build python.build ];
-			test = [ other.test python.test ];
-			runtime = [ other.runtime python.runtime ];
+			build = other.build ++ python.build;
+			test = other.test ++ python.test;
+			runtime = other.runtime ++ python.runtime;
 		};
 
-		pythonDevelopmentEnvironment = python.withPackages (_: [
-			dependencies.python.build
-			dependencies.python.test
+		pythonDevelopmentEnvironment = python.withPackages (_:
+			dependencies.python.build ++
+			dependencies.python.test ++
 			dependencies.python.runtime
-		]);
+		);
 
 		za-zombie = buildPythonApplication {
 			name = "za-zombie";
@@ -52,12 +52,12 @@
 			inherit za-zombie;
 		};	
 		devShell = pkgs.mkShell {
-			nativeBuildInputs = with pkgs; [
-				pythonDevelopmentEnvironment
-				dependencies.other.build
-				dependencies.other.test
+			nativeBuildInputs = with pkgs;
+				[ pythonDevelopmentEnvironment ] ++
+				dependencies.other.build ++
+				dependencies.other.test ++
 				dependencies.other.runtime
-			];
+			;
 			buildInputs = [ ];
 		};
 	});
