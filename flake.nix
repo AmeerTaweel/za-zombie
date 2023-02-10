@@ -1,64 +1,81 @@
 {
-	description = "YouTube Music Downloader";
+  description = "YouTube Music Downloader";
 
-	inputs = {
-		nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-		flake-utils.url = "github:numtide/flake-utils";
-	};
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    flake-utils.url = "github:numtide/flake-utils";
+  };
 
-	outputs = { self, nixpkgs, flake-utils }:
-	flake-utils.lib.eachDefaultSystem (system: let
-		pkgs = import nixpkgs { inherit system; };
+  outputs = {
+    self,
+    nixpkgs,
+    flake-utils,
+    ...
+  } @ inputs: let
+    forAllSystems = nixpkgs.lib.genAttrs [
+      "aarch64-linux"
+      "aarch64-darwin"
+      "x86_64-darwin"
+      "x86_64-linux"
+    ];
 
-		python = pkgs.python3;
-		pythonPkgs = python.pkgs;
-		buildPythonApplication = pythonPkgs.buildPythonApplication;
+    mkZaZombie = pkgs:
+      pkgs.python3Packages.buildPythonApplication {
+        name = "za-zombie";
+        format = "pyproject";
+        src = ./.;
+        buildInputs = with pkgs.python3Packages; [
+          flit
+        ];
+        propagatedBuildInputs =
+          (with pkgs; [
+            ffmpeg
+          ])
+          ++ (with pkgs.python3Packages; [
+            mutagen
+            rich
+            yt-dlp
+          ]);
+      };
+  in {
+    packages = forAllSystems (system: let
+      pkgs = import nixpkgs {inherit system;};
+      za-zombie = mkZaZombie pkgs;
+    in {
+      inherit za-zombie;
+      default = za-zombie;
+    });
 
-		dependencies = rec {
-			python = with pythonPkgs; {
-				build = [ flit ];
-				test = [ ];
-				runtime = [ mutagen rich yt-dlp ];
-			};
-			other = with pkgs; {
-				build = [ ];
-				test = [ ];
-				runtime = [ ffmpeg ];
-			};
-			build = other.build ++ python.build;
-			test = other.test ++ python.test;
-			runtime = other.runtime ++ python.runtime;
-		};
+    devShells = forAllSystems (system: let
+      pkgs = import nixpkgs {inherit system;};
+      pythonEnv = pkgs.python3.withPackages (pythonPkgs:
+        with pythonPkgs; [
+          mutagen
+          rich
+          yt-dlp
+        ]);
+    in {
+      default = pkgs.mkShell {
+        nativeBuildInputs = with pkgs; [
+          pythonEnv
+          ffmpeg
+        ];
+        buildInputs = [];
+      };
+    });
 
-		pythonDevelopmentEnvironment = python.withPackages (_:
-			dependencies.python.build ++
-			dependencies.python.test ++
-			dependencies.python.runtime
-		);
+    overlays.default = final: prev: let
+      pkgs = import nixpkgs {inherit (final) system;};
+      za-zombie = mkZaZombie pkgs;
+    in {
+      inherit za-zombie;
+    };
 
-		za-zombie = buildPythonApplication {
-			name = "za-zombie";
-			format = "pyproject";
-			src = ./.;
-			buildInputs = dependencies.build;
-			propagatedBuildInputs = dependencies.runtime;
-		};
-	in {
-		packages = {
-			default = za-zombie;
-			inherit za-zombie;
-		};
-		overlays.default = final: prev: {
-			inherit za-zombie;
-		};	
-		devShell = pkgs.mkShell {
-			nativeBuildInputs = with pkgs;
-				[ pythonDevelopmentEnvironment ] ++
-				dependencies.other.build ++
-				dependencies.other.test ++
-				dependencies.other.runtime
-			;
-			buildInputs = [ ];
-		};
-	});
+    formatter = forAllSystems (
+      system: let
+        pkgs = nixpkgs.legacyPackages.${system};
+      in
+        pkgs.alejandra
+    );
+  };
 }
